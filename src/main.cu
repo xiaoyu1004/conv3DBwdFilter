@@ -79,8 +79,8 @@ void ConvolutionBackwardFilter(int input_n, int input_c, int input_d, int input_
     CUDNN_CHECK(cudnnCreateTensorDescriptor(&yDesc));
 
     const int dim_w[5] = {output_c, input_c, kernel_d, kernel_h, kernel_w};
-    const int stride_w[5] = {input_c * kernel_d * kernel_h * kernel_w, kernel_d * kernel_h * kernel_w, kernel_h * kernel_w, kernel_w, 1};
-    CUDNN_CHECK(cudnnSetTensorNdDescriptor(wDesc, CUDNN_DATA_FLOAT, 5, dim_w, strideA));
+
+    CUDNN_CHECK(cudnnSetFilterNdDescriptor(wDesc, CUDNN_DATA_FLOAT, CUDNN_TENSOR_NCHW, 5, dim_w));
 
     const int dim_x[5] = {input_n, input_c, input_d, input_h, input_w};
     const int stride_x[5] = {input_c * input_d * input_h * input_w, input_d * input_h * input_w, input_h * input_w, input_w, 1};
@@ -96,7 +96,6 @@ void ConvolutionBackwardFilter(int input_n, int input_c, int input_d, int input_
     int stride[] = {1, 1, 1};
     int upscale[] = {1, 1, 1};
     CUDNN_CHECK(cudnnSetConvolutionNdDescriptor(convDesc, 3, pad, stride, upscale, CUDNN_CROSS_CORRELATION, CUDNN_DATA_FLOAT));
-    // CUDNN_CHECK(cudnnSetConvolution2dDescriptor(convDesc, pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w, CUDNN_CROSS_CORRELATION, CUDNN_DATA_FLOAT));
 
     cudnnConvolutionBwdFilterAlgo_t algo = CUDNN_CONVOLUTION_BWD_FILTER_ALGO_3;
     size_t workspace_size;
@@ -116,7 +115,7 @@ void ConvolutionBackwardFilter(int input_n, int input_c, int input_d, int input_
     std::cout << "gpu(cudnn):" << std::endl;
     for (int n = 0; n < output_c; ++n)
     {
-        for (int d = 0, d < kernel_d; ++d)
+        for (int d = 0; d < kernel_d; ++d)
         {
             for (int i = 0; i < kernel_h; ++i)
             {
@@ -145,4 +144,41 @@ void ConvolutionBackwardFilter(int input_n, int input_c, int input_d, int input_
     delete[] h_w;
     delete[] h_ref_w;
     delete[] h_y;
+}
+
+int main()
+{
+    int input_n = 1;
+    int input_c = 4;
+    int input_d = 4;
+    int input_h = 4;
+    int input_w = 4;
+
+    int output_c = 1;
+    int kernel_d = 3;
+    int kernel_h = 3;
+    int kernel_w = 3;
+
+    int stride_d = 1;
+    int stride_h = 1;
+    int stride_w = 1;
+
+    int pad_d = 0;
+    int pad_h = 0;
+    int pad_w = 0;
+
+    int dilation_d = 1;
+    int dilation_h = 1;
+    int dilation_w = 1;
+
+    int group = 1;
+
+    ConvolutionBackwardFilter(input_n, input_c, input_d, input_h, input_w,
+                              output_c, kernel_d, kernel_h, kernel_w,
+                              stride_d, stride_h, stride_w,
+                              pad_d, pad_h, pad_w,
+                              dilation_d, dilation_h, dilation_w,
+                              group);
+
+    return 0;
 }
