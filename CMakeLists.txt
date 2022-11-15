@@ -4,16 +4,12 @@ project(how_to_optimize_gemm_in_gpu LANGUAGES CXX)
 option(ENABLE_NVIDIA "enable nvidia" ON)
 option(ENABLE_ILUVATAR "enable iluvatar" OFF)
 
-set(srcs ${PROJECT_SOURCE_DIR}/src/main.cu)
-get_filename_component(name ${srcs} NAME_WLE)
-
 # nvidia
 if (ENABLE_NVIDIA)
     enable_language(CUDA)
     set(CMAKE_CUDA_ARCHITECTURES 70)
 
-    list(APPEND srcs ${PROJECT_SOURCE_DIR}/src/main.cu)
-    add_executable(${PROJECT_NAME} ${srcs})
+    add_executable(conv2DBwdFilter ${PROJECT_SOURCE_DIR}/src/conv2DBwdFilter.cu)
     target_include_directories(${PROJECT_NAME} PRIVATE /usr/local/cuda/include)
     target_link_libraries(${PROJECT_NAME} PRIVATE cudnn)
 endif()
@@ -39,8 +35,7 @@ if (ENABLE_ILUVATAR)
 
     include(${PROJECT_SOURCE_DIR}/cmake/CUDA.cmake)
 
-    list(APPEND srcs ${PROJECT_SOURCE_DIR}/src/main.cu)
-    cuda_add_executable(${PROJECT_NAME} ${srcs})
-    target_include_directories(${PROJECT_NAME} PRIVATE ${CUDA_TOOLKIT_ROOT_DIR}/include)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcudart.so ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcudnn.so)
+    cuda_add_executable(conv2DBwdFilter ${PROJECT_SOURCE_DIR}/src/conv2DBwdFilter.cu)
+    target_include_directories(conv2DBwdFilter PRIVATE ${CUDA_TOOLKIT_ROOT_DIR}/include)
+    target_link_libraries(conv2DBwdFilter PRIVATE ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcudart.so ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcudnn.so)
 endif()
