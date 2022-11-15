@@ -10,8 +10,8 @@ if (ENABLE_NVIDIA)
     set(CMAKE_CUDA_ARCHITECTURES 70)
 
     add_executable(conv2DBwdFilter ${PROJECT_SOURCE_DIR}/src/conv2DBwdFilter.cu)
-    target_include_directories(${PROJECT_NAME} PRIVATE /usr/local/cuda/include)
-    target_link_libraries(${PROJECT_NAME} PRIVATE cudnn)
+    target_include_directories(conv2DBwdFilter PRIVATE /usr/local/cuda/include)
+    target_link_libraries(conv2DBwdFilter PRIVATE cudnn)
 endif()
 
 # iluvatar corex
